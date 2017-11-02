@@ -14,7 +14,8 @@ exports.headers = {
 var mimeTypes = {
   '.html': 'text/html',
   '.css': 'text/css',
-  '.js': 'application/json'
+  '.js': 'application/json',
+  '.ico': 'image/x-icon'
 
 };
 
@@ -51,9 +52,9 @@ exports.getAssetPath = function(reqUrl) {
   console.log(urlParts);
   
   if (urlParts.pathname === '/') {
-    return './web/public/index.html';
+    return `${archive.paths.siteAssets}/index.html`;
   } else {
-    return './web/public' + pathname; 
+    return `${archive.paths.siteAssets}${pathname}`; 
   }
   
 };
