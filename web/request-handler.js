@@ -16,7 +16,7 @@ exports.handleRequest = function (req, res) {
     console.log('SERVING STATIC FILES');
     
     var assetPath = httpHelpers.getAssetPath(req.url);
-    httpHelpers.serveAssets(res, assetPath);
+    httpHelpers.serveAssets(res, assetPath, 200);
     
   } else if ( req.method === 'POST' ) {
     // Read list of URLs to see it url is already recorded
@@ -29,7 +29,7 @@ exports.handleRequest = function (req, res) {
     });
     req.on('end', function() {
       var newURL = body.slice(4) + '\n';
-      archive.isUrlInList(newURL, archive.isUrlArchived, archive.addUrlToList.bind(null, res, newURL));
+      archive.isUrlInList(newURL, archive.isUrlArchived.bind(null, res, newURL), archive.addUrlToList.bind(null, res, newURL));
       
     });
     

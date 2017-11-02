@@ -21,7 +21,7 @@ var mimeTypes = {
 
 
 
-exports.serveAssets = function(res, asset, callback) {
+exports.serveAssets = function(res, asset, statusCode, callback) {
   // Write some code here that helps serve up your static files!
   // (Static files are things like html (yours or archived from others...),
   // css, or anything that doesn't change often.)
@@ -33,7 +33,6 @@ exports.serveAssets = function(res, asset, callback) {
       throw err;
     }
     
-    var statusCode = 200;
     var headers = exports.headers;
     headers['Content-Type'] = mimeTypes[path.extname(asset)];
     res.writeHead(statusCode, headers); 
@@ -63,30 +62,6 @@ exports.getAssetPath = function(reqUrl) {
 // As you progress, keep thinking about what helper functions you can put here!
 
 
-
-
-  // if (urlParts.root === '/' && urlParts.base === '' && req.method === 'GET') {
-    
-  //   console.log('HANDLING INDEX.HTML REQUEST');
-    
-  //   fs.readFile('./web/public/index.html', (err, data) => {
-  //     if (err) {
-  //       throw err;
-  //     }
-      
-  //     var statusCode = 200;
-  //     var headers = httpHelpers.headers;
-  //     headers['Content-Type'] = 'text/html';
-  //     // console.log('HEADERS', headers);
-  //     // console.log(data.toString());
-      
-  //     res.writeHead(statusCode, headers);
-      
-  //     res.end(data);
-      
-
-      
-  //   });
     
   // }
   
