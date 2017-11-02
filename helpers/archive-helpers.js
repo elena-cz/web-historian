@@ -32,6 +32,13 @@ exports.isUrlInList = function(url, callback) {
 };
 
 exports.addUrlToList = function(url, callback) {
+  fs.appendFile('./archives/sites.txt', url, (err, url) => {
+    if (err) {
+      throw err;
+    }
+    callback(url);
+    console.log('Added URL to file');
+  });
 };
 
 exports.isUrlArchived = function(url, callback) {
