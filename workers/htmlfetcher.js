@@ -1,5 +1,5 @@
 var cron = require('node-cron');
-var httpHelpers = require('../web/http-helpers.js');
+var archive = require('../helpers/archive-helpers.js');
 
 
 // Use the code in `archive-helpers.js` to actually download the urls
@@ -13,15 +13,22 @@ var httpHelpers = require('../web/http-helpers.js');
 // Call downloadUrls urls
 
 // Use
-// httpHelpers.downloadUrls = function(url)
-// httpHelpers.isUrlArchived = function(res, url, trueCb, falseCb) {
-// httpHelpers.readListOfUrls = function(callback) 
+// archive.downloadUrls = function(url)
+// archive.isUrlArchived = function(res, url, trueCb, falseCb) {
+// archive.readListOfUrls = function(callback) 
 
 
 cron.schedule('* * * * *', function() {
   console.log('running a task every minute');
   
-  
+  archive.readListOfUrls( (sites) => {
+    sites.forEach( site => {
+      if (site !== '') {
+        archive.isUrlArchived(site.trim(), null, () => { return; }, archive.downloadUrl);
+      }
+    });
+    
+  });
   
   
   

@@ -14,10 +14,9 @@ exports.handleRequest = function (req, res) {
   if ( req.method === 'GET' && (req.url === '/' || req.url === '/styles.css') ) {
      
     var assetPath = httpHelpers.getSiteAssetPath(req.url);
-    httpHelpers.serveAssets(res, assetPath, 200);
+    httpHelpers.serveAssets(assetPath, res, 200);
 
 
-    
   } else if ( req.method === 'POST' ) {
     // Read list of URLs to see it url is already recorded
     // If it is there,  serve up static files for requested url
@@ -29,7 +28,7 @@ exports.handleRequest = function (req, res) {
     });
     req.on('end', function() {
       var newURL = (body.startsWith('url=')) ? body.slice(4) + '\n' : body + '\n';
-      archive.isUrlInList(newURL, archive.isUrlArchived.bind(null, res, newURL, archive.renderArchive, archive.renderLoading), archive.addUrlToList.bind(null, res, newURL, archive.renderLoading));
+      archive.isUrlInList(newURL, archive.isUrlArchived.bind(null, newURL, res, archive.renderArchive, archive.renderLoading), archive.addUrlToList.bind(null, newURL, res, archive.renderLoading));
     });
   
   } else {

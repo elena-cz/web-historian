@@ -2,6 +2,7 @@ var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
 var http = require('http');
+var https = require('https');
 var httpHelpers = require('../web/http-helpers');
 var htmlfetcher = require('../workers/htmlfetcher');
 
@@ -38,7 +39,6 @@ exports.readListOfUrls = function(callback) {
     if (err) {
       throw err;
     }
-    console.log(data.split('\n'));
     return callback(data.split('\n'));
   });
 };
@@ -50,7 +50,6 @@ exports.isUrlInList = function(url, trueCb, falseCb) {
       // else: false
   // callback on the result
   exports.readListOfUrls(function(urls) {
-    console.log('INDEX', urls.indexOf(url));
     if (urls.indexOf(url.trim()) > -1) {
       trueCb(url);
     } else {
@@ -61,30 +60,34 @@ exports.isUrlInList = function(url, trueCb, falseCb) {
   
 };
 
-exports.addUrlToList = function(res, url, callback) {
+exports.addUrlToList = function(url, res, callback) {
   fs.appendFile(exports.paths.list, url, (err, url) => {
     if (err) {
       throw err;
     }
     console.log('Added URL to file');
-    callback(res);
+    callback(url, res);
   });
 };
 
-exports.fileNameCreator = function(url) {
-  return url.replace(/\//g, '_').replace(/:/g, '_');
-};
 
-exports.isUrlArchived = function(res, url, trueCb, falseCb) {
+exports.isUrlArchived = function(url, res, trueCb, falseCb) {
   // Get file name and path for URL in archive
   // Call serve assets 
+  url = url.trim();
+  
   fs.readdir(exports.paths.archivedSites, (err, files) => {
-    files = files.map( (file) => file.slice(0, -1));
-    var result = _.some(files, (file) => file === url.trim());    
+    files = files.map( (file) => file.trim());
+    var result = _.some(files, (file) => {
+      console.log(`url: "${url}" , file: "${file}"`);
+      return file === url; 
+    });    
     if (result) {
-      trueCb(res, url);
+      console.log(`"${url}" is in archive`);
+      trueCb(url, res);
     } else {
-      falseCb(res, url);
+      console.log(`"${url}" is NOT archive`);
+      falseCb(url, res);
     }
   });
 
@@ -93,7 +96,7 @@ exports.isUrlArchived = function(res, url, trueCb, falseCb) {
 
 
 // Change to take in an array of urls
-exports.downloadUrls = function(url) {
+exports.downloadUrl = function(url) {
   // Check if there are any sites in list that are not in archive
   // If there are, for each site
     // Get full URL
@@ -102,20 +105,20 @@ exports.downloadUrls = function(url) {
 
   var filepath = `${exports.paths.archivedSites}/${exports.fileNameCreator(url)}`;
 
-  if (url.startsWith('https://')) {
-    url = 'http://' + url.slice(8);
-  } else if (!url.startsWith('http://')) {
-    url = 'http://' + url;
+  // if (url.startsWith('https://')) {
+  //   url = 'http://' + url.slice(8);
+  // } else 
+  if (!url.startsWith('https://')) {
+    url = 'https://' + url;
   }
 
-  http.get(url, (res) => {
+  https.get(url, (res) => {
     res.setEncoding('utf8');
     var body = '';
     res.on('data', (chunk) => {
       body += chunk;
     });
     res.on('end', () => {
-      console.log('body: ', body);
       fs.writeFile(filepath, body, (err) => {
         if (err) {
           throw err;
@@ -128,13 +131,16 @@ exports.downloadUrls = function(url) {
 
 };
 
-
-
-exports.renderLoading = function(res) {
-  httpHelpers.serveAssets(res, `${exports.paths.siteAssets}/loading.html`, 200);
+exports.fileNameCreator = function(url) {
+  return url.replace(/\//g, '_').replace(/:/g, '_');
 };
 
-exports.renderArchive = function(res, url) {
+
+exports.renderLoading = function(url = null, res) {
+  httpHelpers.serveAssets(`${exports.paths.siteAssets}/loading.html`, res, 200);
+};
+
+exports.renderArchive = function(url, res) {
   var filepath = `${exports.paths.archivedSites}/${exports.fileNameCreator(url)}`;
-  httpHelpers.serveAssets(res, filepath, 301);
+  httpHelpers.serveAssets(filepath, res, 301);
 };
