@@ -52,10 +52,8 @@ exports.isUrlInList = function(url, trueCb, falseCb) {
   exports.readListOfUrls(function(urls) {
     console.log('INDEX', urls.indexOf(url));
     if (urls.indexOf(url.trim()) > -1) {
-      console.log('True: url is in file');
       trueCb(url);
     } else {
-      console.log('False: url is not in file');
       falseCb(url);
     }
   });
@@ -69,7 +67,7 @@ exports.addUrlToList = function(res, url, callback) {
       throw err;
     }
     console.log('Added URL to file');
-    exports.renderLoading(res);
+    callback(res);
   });
 };
 
@@ -77,20 +75,24 @@ exports.fileNameCreator = function(url) {
   return url.replace(/\//g, '_').replace(/:/g, '_');
 };
 
-exports.isUrlArchived = function(res, url, callback) {
-  console.log('isUrlArchived');
+exports.isUrlArchived = function(res, url, trueCb, falseCb) {
   // Get file name and path for URL in archive
   // Call serve assets 
-  var filepath = `${exports.paths.archivedSites}/${exports.fileNameCreator(url)}`;
-  console.log('filepath', filepath);
-  httpHelpers.serveAssets(res, filepath, 200);
- 
-   
+  fs.readdir(exports.paths.archivedSites, (err, files) => {
+    files = files.map( (file) => file.slice(0, -1));
+    var result = _.some(files, (file) => file === url.trim());    
+    if (result) {
+      trueCb(res, url);
+    } else {
+      falseCb(res, url);
+    }
+  });
 
 
-  // exports.downloadUrls(url);
 };
 
+
+// Change to take in an array of urls
 exports.downloadUrls = function(url) {
   // Check if there are any sites in list that are not in archive
   // If there are, for each site
@@ -127,6 +129,12 @@ exports.downloadUrls = function(url) {
 };
 
 
+
 exports.renderLoading = function(res) {
   httpHelpers.serveAssets(res, `${exports.paths.siteAssets}/loading.html`, 200);
+};
+
+exports.renderArchive = function(res, url) {
+  var filepath = `${exports.paths.archivedSites}/${exports.fileNameCreator(url)}`;
+  httpHelpers.serveAssets(res, filepath, 301);
 };

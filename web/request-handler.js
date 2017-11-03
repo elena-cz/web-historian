@@ -11,12 +11,12 @@ exports.handleRequest = function (req, res) {
   console.log(`Handling ${req.method} for ${req.url}`);
    
 
-  if ( req.method === 'GET' ) {
-    
-    console.log('SERVING STATIC FILES');
-    
-    var assetPath = httpHelpers.getAssetPath(req.url);
+  if ( req.method === 'GET' && (req.url === '/' || req.url === '/styles.css') ) {
+     
+    var assetPath = httpHelpers.getSiteAssetPath(req.url);
     httpHelpers.serveAssets(res, assetPath, 200);
+
+
     
   } else if ( req.method === 'POST' ) {
     // Read list of URLs to see it url is already recorded
@@ -28,18 +28,20 @@ exports.handleRequest = function (req, res) {
       body += chunk;
     });
     req.on('end', function() {
-      var newURL = body.slice(4) + '\n';
-      archive.isUrlInList(newURL, archive.isUrlArchived.bind(null, res, newURL), archive.addUrlToList.bind(null, res, newURL));
-      
+      var newURL = (body.startsWith('url=')) ? body.slice(4) + '\n' : body + '\n';
+      archive.isUrlInList(newURL, archive.isUrlArchived.bind(null, res, newURL, archive.renderArchive, archive.renderLoading), archive.addUrlToList.bind(null, res, newURL, archive.renderLoading));
     });
+  
+  } else {
     
-
+    var headers = httpHelpers.headers;
+    res.writeHead(404, headers); 
+    res.end();
     
     
   }
   
-  
-  
+   
   
   
   //res.end(archive.paths.list);

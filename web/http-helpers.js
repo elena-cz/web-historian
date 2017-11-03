@@ -28,7 +28,7 @@ exports.serveAssets = function(res, asset, statusCode, callback) {
 
   
   fs.readFile(asset, (err, data) => {
-    console.log(asset);
+
     if (err) {
       throw err;
     }
@@ -44,11 +44,10 @@ exports.serveAssets = function(res, asset, statusCode, callback) {
 
 
 
-exports.getAssetPath = function(reqUrl) {
+exports.getSiteAssetPath = function(reqUrl) {
 
   var urlParts = url.parse(reqUrl);
   var pathname = urlParts.pathname;
-  console.log(urlParts);
   
   if (urlParts.pathname === '/') {
     return `${archive.paths.siteAssets}/index.html`;
@@ -57,12 +56,3 @@ exports.getAssetPath = function(reqUrl) {
   }
   
 };
-
-
-// As you progress, keep thinking about what helper functions you can put here!
-
-
-    
-  // }
-  
-  
